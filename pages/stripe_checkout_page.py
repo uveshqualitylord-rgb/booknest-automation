@@ -10,9 +10,36 @@ TEST_CVC = "123"
 
 class StripeCheckoutPage(BasePage):
     def wait_until_open(self):
-        self.page.wait_for_url(re.compile(r"checkout\.stripe\.com", re.I), timeout=60_000)
-        self.page.locator("#payment-numberInput").wait_for(state="visible")
+        self.page.wait_for_url(
+            re.compile(r"checkout\.stripe\.com", re.I),
+            timeout=60_000,
+            wait_until="commit",
+        )
+        self._open_card_payment_method()
+        self.page.locator("#payment-numberInput").wait_for(state="visible", timeout=45_000)
         return self
+
+    def _open_card_payment_method(self):
+        card_input = self.page.locator("#payment-numberInput")
+        try:
+            if card_input.is_visible(timeout=3_000):
+                return
+        except Exception:
+            pass
+
+        candidates = [
+            self.page.get_by_test_id("card-accordion-item-button"),
+            self.page.get_by_role("radio", name=re.compile(r"card", re.I)),
+            self.page.get_by_role("button", name=re.compile(r"^card$", re.I)),
+            self.page.locator('[data-testid="payment-method-accordion-item-title"]', has_text=re.compile(r"card", re.I)),
+        ]
+        for candidate in candidates:
+            try:
+                if candidate.count() and candidate.first.is_visible(timeout=2_000):
+                    candidate.first.click()
+                    return
+            except Exception:
+                continue
 
     def fill_card(self, card_number: str):
         self.page.locator("#payment-numberInput").fill(card_number)
@@ -33,7 +60,7 @@ class StripeCheckoutPage(BasePage):
         return self
 
     def wait_for_booking_page(self):
-        self.page.wait_for_url(re.compile(r"/bookings/"), timeout=90_000)
+        self.page.wait_for_url(re.compile(r"/bookings/"), timeout=90_000, wait_until="commit")
         return self
 
     def card_error(self):

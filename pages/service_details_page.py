@@ -74,3 +74,41 @@ class ServiceDetailsPage(BasePage):
     def confirm_pay_and_book(self):
         self.pay_and_book_button().click()
         return self
+
+    def dismiss_popup_if_open(self):
+        popup = self.confirm_popup()
+        try:
+            if popup.is_visible(timeout=1_000):
+                self.page.keyboard.press("Escape")
+                popup.wait_for(state="hidden", timeout=5_000)
+        except Exception:
+            pass
+
+    def book_until_stripe(self):
+        self.page.get_by_text("Choose a date", exact=False).first.wait_for(state="visible")
+        dates = self.date_buttons()
+        stripe = re.compile(r"checkout\.stripe\.com", re.I)
+
+        for date_index in range(dates.count()):
+            dates.nth(date_index).click()
+            self.wait_for_time_slots()
+            if not self.has_open_time_on_selected_day():
+                continue
+
+            times = self.time_buttons()
+            for time_index in range(times.count()):
+                time_btn = times.nth(time_index)
+                if not time_btn.is_enabled():
+                    continue
+
+                time_btn.click()
+                self.click_book()
+                self.confirm_pay_and_book()
+
+                try:
+                    self.page.wait_for_url(stripe, timeout=20_000, wait_until="commit")
+                    return self
+                except Exception:
+                    self.dismiss_popup_if_open()
+
+        raise RuntimeError("Could not reach Stripe Checkout from any open slot.")

@@ -81,9 +81,7 @@ def test_stripe_declined_card_shows_error(page):
     expect(page).to_have_url(re.compile(r"/customer-dashboard"), timeout=30_000)
 
     details = CustomerDashboardPage(page).click_book_another_service().open_first_service()
-    details.select_first_open_slot()
-    details.click_book()
-    details.confirm_pay_and_book()
+    details.book_until_stripe()
 
     stripe = StripeCheckoutPage(page)
     stripe.wait_until_open()

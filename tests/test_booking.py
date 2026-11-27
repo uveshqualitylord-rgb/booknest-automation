@@ -20,23 +20,18 @@ def test_customer_books_and_pays_with_stripe(page):
     login.login(customer["email"], customer["password"])
     expect(page).to_have_url(re.compile("/customer-dashboard"), timeout=30_000)
 
-    dashboard = CustomerDashboardPage(page)
-    discovery = dashboard.click_book_another_service()
+    discovery = CustomerDashboardPage(page).click_book_another_service()
     expect(page).to_have_url(re.compile("/service-discovery"))
 
     details = discovery.open_first_service()
     expect(page).to_have_url(re.compile(r"/service-details\?id="))
-
-    details.select_first_open_slot()
-    details.click_book()
-    details.confirm_pay_and_book()
+    details.book_until_stripe()
 
     stripe = StripeCheckoutPage(page)
     stripe.wait_until_open()
     stripe.fill_test_payment()
     stripe.click_pay()
     stripe.wait_for_booking_page()
-
 
     booking = BookingDetailPage(page)
     booking.wait_for_paid()
