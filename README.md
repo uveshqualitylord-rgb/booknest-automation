@@ -15,13 +15,13 @@ End-to-end and API checks for [BookNest](https://booknest.niraj.shop) — custom
 
 | Suite | What it checks |
 |--------|----------------|
-| Smoke | Home page loads |
+| Smoke | Home UI + HTTP 200 for `/` and `/service-discovery` |
 | Auth | Customer / provider / admin login → role home |
 | Booking (CI) | Discover → open slot → Stripe Checkout opens |
 | Booking (local) | Card fill → Pay → Paid (`pytest -m stripe_fill`) |
 | Negative | Empty login, wrong password, disabled slot, customer blocked from admin |
 | Negative (local) | Declined card (`4000…0002`) via `stripe_fill` |
-| API | Public page status/body, Supabase auth rejection |
+| API | Supabase auth rejects bad password |
 
 ## Layout
 
@@ -45,7 +45,7 @@ playwright install chromium
 cp .env.example .env
 ```
 
-Fill `.env` with app credentials. Optional for the auth API test: `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
+Fill `.env` with app credentials plus `SUPABASE_URL` and `SUPABASE_ANON_KEY` for the API test.
 
 ## Run
 
@@ -63,7 +63,7 @@ On failure Playwright keeps screenshots and traces under `test-results/`.
 
 Runs `pytest -m "not stripe_fill"` on `ubuntu-24.04`. Full card payment is local-only because hosted Checkout often shows Link/wallet UI in CI without `#payment-numberInput`.
 
-Secrets: `BASE_URL`, role emails/passwords, optional `SUPABASE_URL` / `SUPABASE_ANON_KEY`.
+Secrets: `BASE_URL`, role emails/passwords, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
 
 Artifacts: pytest HTML report (always) and failure screenshots/traces.
 
