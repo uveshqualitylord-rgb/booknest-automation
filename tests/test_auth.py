@@ -6,7 +6,6 @@ from playwright.sync_api import expect
 from data.users import USERS
 from pages.home_page import HomePage
 
-#runs full auth flow
 @pytest.mark.parametrize("role", ["customer", "provider", "admin"])
 def test_login_from_home_redirects_to_role_home(page, role):
     user = USERS[role]

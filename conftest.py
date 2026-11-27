@@ -7,7 +7,6 @@ from config.settings import BASE_URL
 
 @pytest.fixture(scope="session")
 def base_url() -> str:
-    """Provide BASE_URL to pytest-playwright / pytest-base-url."""
     return BASE_URL
 
 
@@ -15,7 +14,6 @@ def base_url() -> str:
 def browser_type_launch_args(browser_type_launch_args):
     return {
         **browser_type_launch_args,
-        # Headless on CI (GitHub sets CI=true); headed locally for debugging.
         "headless": os.getenv("CI") == "true",
     }
 

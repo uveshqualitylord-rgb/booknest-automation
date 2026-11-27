@@ -1,6 +1,5 @@
 import os
 
-# Ensures .env is loaded before reading credentials.
 from config.settings import BASE_URL  # noqa: F401
 
 
