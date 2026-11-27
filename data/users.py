@@ -1,6 +1,9 @@
 import os
+from pathlib import Path
 
-from config.settings import BASE_URL  # noqa: F401
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 
 def _require(name: str) -> str:

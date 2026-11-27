@@ -3,5 +3,5 @@ __pycache__/
 .pytest_cache/
 .env
 test-results/
-playwright-report/
+reports/
 *.pyc

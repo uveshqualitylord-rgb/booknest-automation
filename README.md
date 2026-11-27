@@ -1,32 +1,34 @@
 # BookNest Automation
 
-End-to-end UI tests for [BookNest](https://booknest.niraj.shop) — a local-services booking app (customer / provider / admin).
+End-to-end and API checks for [BookNest](https://booknest.niraj.shop) — customer / provider / admin booking flows.
 
 [![E2E](https://github.com/uveshqualitylord-rgb/booknest-automation/actions/workflows/e2e.yml/badge.svg)](https://github.com/uveshqualitylord-rgb/booknest-automation/actions/workflows/e2e.yml)
 
 ## Stack
 
 - Python 3.13
-- Pytest + Playwright
-- Page Object Model (POM)
-- GitHub Actions CI on every push / PR
+- Pytest + Playwright (POM)
+- pytest-html reports
+- GitHub Actions on every push / PR
 
-## What is covered
+## Coverage
 
-| Suite | Flow |
-|--------|------|
+| Suite | What it checks |
+|--------|----------------|
 | Smoke | Home page loads |
-| Auth | Customer, provider, and admin login → role dashboard |
-| Booking | Discover → pick open slot → confirm → Stripe Checkout → Paid |
+| Auth | Customer / provider / admin login → role home |
+| Booking | Discover → open slot → Stripe → Paid |
+| Negative | Empty login, wrong password, disabled slot, customer blocked from admin, declined card |
+| API | Public page status/body, Supabase auth rejection |
 
 ## Layout
 
 ```text
 booknest-automation/
-├── pages/                 # Page objects
-├── tests/                 # Pytest specs
-├── data/users.py          # Role credentials from env
-├── config/settings.py     # BASE_URL
+├── pages/
+├── tests/
+├── data/users.py
+├── config/settings.py
 ├── conftest.py
 └── .github/workflows/e2e.yml
 ```
@@ -41,18 +43,26 @@ playwright install chromium
 cp .env.example .env
 ```
 
-Fill `.env` with `BASE_URL` and customer / provider / admin credentials.
+Fill `.env` with app credentials. Optional for the auth API test: `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
 
-## Run locally
+## Run
 
 ```bash
 pytest -v
-pytest tests/test_booking.py -v
+pytest -m negative -v
+pytest -m api -v
 pytest -m booking -v
 ```
 
+HTML report: `reports/report.html`  
+On failure Playwright keeps screenshots and traces under `test-results/`.
+
 ## CI
 
-GitHub Actions runs Chromium E2E on `main` and pull requests. Required repository secrets:
+Secrets: `BASE_URL`, role emails/passwords, optional `SUPABASE_URL` / `SUPABASE_ANON_KEY`.
 
-`BASE_URL`, `CUSTOMER_EMAIL`, `CUSTOMER_PASSWORD`, `PROVIDER_EMAIL`, `PROVIDER_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`
+Artifacts: pytest HTML report (always) and failure screenshots/traces.
+
+## Sample report
+
+![pytest-html report](docs/pytest-report.png)

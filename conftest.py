@@ -1,8 +1,14 @@
 import os
+from pathlib import Path
 
 import pytest
 
 from config.settings import BASE_URL
+
+
+def pytest_configure():
+    Path("reports").mkdir(exist_ok=True)
+    Path("test-results").mkdir(exist_ok=True)
 
 
 @pytest.fixture(scope="session")

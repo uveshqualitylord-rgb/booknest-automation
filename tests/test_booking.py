@@ -37,6 +37,7 @@ def test_customer_books_and_pays_with_stripe(page):
     stripe.click_pay()
     stripe.wait_for_booking_page()
 
+
     booking = BookingDetailPage(page)
     booking.wait_for_paid()
     expect(booking.paid_badge()).to_be_visible()
