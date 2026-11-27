@@ -17,8 +17,10 @@ End-to-end and API checks for [BookNest](https://booknest.niraj.shop) — custom
 |--------|----------------|
 | Smoke | Home page loads |
 | Auth | Customer / provider / admin login → role home |
-| Booking | Discover → open slot → Stripe → Paid |
-| Negative | Empty login, wrong password, disabled slot, customer blocked from admin, declined card |
+| Booking (CI) | Discover → open slot → Stripe Checkout opens |
+| Booking (local) | Card fill → Pay → Paid (`pytest -m stripe_fill`) |
+| Negative | Empty login, wrong password, disabled slot, customer blocked from admin |
+| Negative (local) | Declined card (`4000…0002`) via `stripe_fill` |
 | API | Public page status/body, Supabase auth rejection |
 
 ## Layout
@@ -48,16 +50,18 @@ Fill `.env` with app credentials. Optional for the auth API test: `SUPABASE_URL`
 ## Run
 
 ```bash
-pytest -v
+pytest -v -m "not stripe_fill"
+pytest -m stripe_fill -v
 pytest -m negative -v
 pytest -m api -v
-pytest -m booking -v
 ```
 
 HTML report: `reports/report.html`  
 On failure Playwright keeps screenshots and traces under `test-results/`.
 
 ## CI
+
+Runs `pytest -m "not stripe_fill"` on `ubuntu-24.04`. Full card payment is local-only because hosted Checkout often shows Link/wallet UI in CI without `#payment-numberInput`.
 
 Secrets: `BASE_URL`, role emails/passwords, optional `SUPABASE_URL` / `SUPABASE_ANON_KEY`.
 

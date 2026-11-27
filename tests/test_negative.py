@@ -72,6 +72,7 @@ def test_disabled_slot_keeps_book_button_disabled(page):
 
 @pytest.mark.negative
 @pytest.mark.booking
+@pytest.mark.stripe_fill
 def test_stripe_declined_card_shows_error(page):
     customer = USERS["customer"]
 

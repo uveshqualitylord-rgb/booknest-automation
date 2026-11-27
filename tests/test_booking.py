@@ -11,7 +11,7 @@ from pages.stripe_checkout_page import StripeCheckoutPage
 
 
 @pytest.mark.booking
-def test_customer_books_and_pays_with_stripe(page):
+def test_customer_booking_opens_stripe_checkout(page):
     customer = USERS["customer"]
 
     home = HomePage(page)
@@ -25,6 +25,24 @@ def test_customer_books_and_pays_with_stripe(page):
 
     details = discovery.open_first_service()
     expect(page).to_have_url(re.compile(r"/service-details\?id="))
+    details.book_until_stripe()
+
+    expect(page).to_have_url(re.compile(r"checkout\.stripe\.com", re.I), timeout=30_000)
+
+
+@pytest.mark.booking
+@pytest.mark.stripe_fill
+def test_customer_books_and_pays_with_stripe(page):
+    customer = USERS["customer"]
+
+    home = HomePage(page)
+    home.open_home()
+    login = home.click_sign_in()
+    login.login(customer["email"], customer["password"])
+    expect(page).to_have_url(re.compile("/customer-dashboard"), timeout=30_000)
+
+    discovery = CustomerDashboardPage(page).click_book_another_service()
+    details = discovery.open_first_service()
     details.book_until_stripe()
 
     stripe = StripeCheckoutPage(page)
